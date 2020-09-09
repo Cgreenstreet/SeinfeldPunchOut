@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html>
+<head>
+		<meta charset="UTF-8">
+		<title>SeinfeldPunchOut</title>
+		<style type='text/css'>
+				canvas { border: 1px solid black; }
+		</style>
+</head>
+<body>
+		<canvas id='canvas' width='1024' height='576'></canvas>
+		<script type='text/javascript'>
+//----------------Image Loading-----------------------------------------------------------------------------		
+		var Jerry = new Image();
+		Jerry.src = "jerrysienfeld.png";
+		var Jerry_Attack = new Image();
+		Jerry_Attack.src = "Jerry_Attack.png";
+		var Jerry_Attack_B = new Image();
+		Jerry_Attack_B.src = "Jerry_Attack_B.png";
+	
+		var George = new Image();
+		George.src = "georgecastanza.png";
+		var George_Attack = new Image();
+		George_Attack.src = "George_Attack.png";
+		var George_Attack_B = new Image();
+		George_Attack_B.src = "George_Attack_B.png";
+		
+		var Kramer = new Image();
+		Kramer.src = "KramerAlphaChannel.png";
+		var Kramer_Attack = new Image();
+		Kramer_Attack.src = "Kramer_Attack.png";
+		var Kramer_Attack_B = new Image();
+		Kramer_Attack_B.src = "Kramer_Attack_B.png";
+		
+		var Elaine = new Image();
+		Elaine.src = "elaine.png";
+		var Elaine_Attack = new Image();
+		Elaine_Attack.src = "Elaine_Attack.png";
+		var Elaine_Attack_B = new Image();
+		Elaine_Attack_B.src = "Elaine_Attack_B.png";
+		
+		var FightStage = new Image();
+		FightStage.src = "SeinfeldBarStage.jpg";
+		
+		var StartScreen = new Image();
+		StartScreen.src = "Seinfeld_logo.svg.png";
+		
+		var CharScreen = new Image();
+		CharScreen.src = "CharacterSelection.png";
+//----------------------------------------------------------------------------------------------------------
+
+
+
+//--------------------------------Initializing Players------------------------------------------------------
+		var player1 = new Object();
+		var player2 = new Object();
+		var WIDTH = 1024;
+		var HEIGHT = 576;
+		var FPS = 60;
+		var chars = new Array();
+//                             name, dmg,speed, JumpSpeed, characterNum, Attack Width, height,  width, character,	KnockBack,  Attack, 			Attack_B
+		chars[0] = character( Jerry,  5, 5,      13,        0,            87,           155,     56,	"Jerry",	.03,		Jerry_Attack, 		Jerry_Attack_B);
+		chars[1] = character( George, 8, 3,      8,         1,            83,           132,     46,	"George",	8,  		George_Attack,		George_Attack_B);
+		chars[2] = character( Kramer, 4, 8,      4,         2,            92,			172,	 55,	"Kramer",   9,  		Kramer_Attack,		Kramer_Attack_B);
+		chars[3] = character( Elaine, 3, 7,      7,         3,			  75,			160,	 58,	"Elaine",	60, 		Elaine_Attack,		Elaine_Attack_B);
+//--------------------------------------------------------------------------------------------------------
+		
+		var up1 = false;
+		var down1 = false;
+		var left1 = false;
+		var right1 = false;
+		var attack1 = false;
+		var hit1 = false;
+		
+		var up2 = false;
+		var down2 = false;
+		var left2 = false;
+		var right2 = false;
+		var attack2 = false;
+		var hit2 = false;
+		
+		var player1ready = false;
+		var player2ready = false;
+		
+		
+		var START = 1, CharSelect = 2, GAME = 3, POST = 4; // in game menus
+		var GameState = START;
+		
+		var hits = 0;
+		var x1 = 150; // player 1 x position
+		var y1 = 410; // player 1 y position
+
+		var x2 = 675; // player 2 x position
+		var y2 = 410; // player 2 y position
+		
+		var gy = 0.5;
+		var floor = 528; // y position of floor??
+		
+		var canvasElement = document.getElementById('canvas');
+		canvasElement.width = WIDTH;
+		canvasElement.height = HEIGHT;
+		var ctx = canvasElement;
+		
+		if(canvasElement.getContext) {
+				ctx = canvasElement.getContext("2d");
+				
+				setInterval(function() {
+					update();
+					draw();
+					
+				}, 1000/FPS);
+		
+		}
+		else {
+				alert("Your browser doesn't support the canvasElement");
+		}
+		
+		function update() {
+		
+			switch(GameState){
+			
+			case START:
+			
+				if (attack1){
+					
+					GameState = CharSelect;
+				}
+				
+			break;
+			
+			case CharSelect:
+			
+			break;
+			
+			case GAME:
+			
+				if(up1)
+				{
+					player1.y -= player1.jSpeed;
+					player1.jSpeed -= gy;
+					if( (player1.y + player1.height) > floor )
+					{
+						player1.y = (floor-player1.height);
+						player1.jSpeed = player1.char.jSpeed;
+					}
+					
+				}
+				if( ( up1 == false) && (player1.y+player1.height) < floor )
+				{
+					player1.y -= player1.jSpeed;
+					player1.jSpeed -= gy;
+				}
+				if(left1)
+					player1.x -= player1.speed;
+				if(right1)
+					player1.x += player1.speed;
+				
+				if(attack1 && collides( player1, player2, 1 ) )
+				{
+					player2.health -= player1.dmg;
+					player2.y -= player2.jSpeed;
+					player2.jSpeed -= gy;
+					if( (player2.y + player2.height) > floor )
+					{
+						player2.y = (floor-player2.height);
+						player2.jSpeed = player2.char.jSpeed;
+					}
+				}
+				if(hit1)
+				{
+					left2 = false;
+					player2.x += player2.speed;
+					player2.speed -= player1.kb;
+					if( (player2.y+player2.height) >= floor )
+					{
+						player2.speed = player2.char.speed;
+						hit1 = false;
+					
+					}
+				}
+				if( player1.x < 0)
+				{
+					player1.x = 0;
+				}
+				if( player1.x > WIDTH - player1.width)
+				{
+					player1.x = WIDTH - player1.width ;
+				}
+				
+				
+				if(up2)
+				{
+					player2.y -= player2.jSpeed;
+					player2.jSpeed -= gy;
+					if( (player2.y+player2.height) > floor )
+					{
+						player2.y = (floor-player2.height);
+						player2.jSpeed = player2.char.jSpeed;
+					}
+				}
+				if( up2 == false && (player2.y+player2.height) < floor )
+				{
+					player2.y -= player2.jSpeed;
+					player2.jSpeed -= gy;
+				}
+				if(left2)
+					player2.x -= player2.speed;
+				if(right2)
+					player2.x += player2.speed;
+				
+				if(attack2 && collides( player2, player1, 2 ) )
+				{
+					player1.health -= player2.dmg;
+					player1.y -= player1.jSpeed;
+					player1.jSpeed -= gy;
+					if( (player1.y + player1.height) > floor )
+					{
+						player1.y = (floor-player1.height);
+						player1.jSpeed = player1.char.jSpeed;
+					}
+				}
+				if ( player1.health <= 0 || player2.health <= 0 )
+				{
+					GameState = POST;
+				}
+				if( player2.x < 0)
+				{
+					player2.x = 0;
+				}
+				if( player2.x > WIDTH - player2.width)
+				{
+					player2.x = WIDTH - player2.width ;
+				}
+			break;
+			
+			case POST:
+			break;
+			
+			default:
+				alert("ur fag");
+			}
+		}
+		function character( name, dmg, speed, jSpeed, num, AWidth, Height, Width, characterName, KnockBack, Attack, Attack_B ){
+			var character = new Object();
+			character.chr = characterName;
+			character.name = name;
+			character.dmg = dmg;
+			character.speed = speed;
+			character.jSpeed = jSpeed;
+			character.num = num;
+			character.AWidth = AWidth;
+			character.height = Height;
+			character.width = Width;
+			character.KnockBack = KnockBack;
+			character.Attack = Attack;
+			character.Attack_B = Attack_B;
+			
+			return character; 
+		}
+		function collides( player1, player2, num ){
+			
+			
+				if( (player1.x+player1.width) < player2.x){
+				
+					if( (player1.x+player1.AWidth) < player2.x ) return false;
+					if( (player1.y+40) < player2.y ) return false;
+					if( (player1.y+40) > (player2.y+player2.height) ) return false;
+					
+					if( num == 1 )
+						hit1 = true;
+					if( num == 2 )
+						hit2 = true;
+						
+					return true;
+				}
+				if( player1.x > ( player2.x+player2.width) ){
+					
+					if( (player1.x-(player1.AWidth/2)) > (player2.x+player2.width) ) return false;
+					if( (player1.y+40) < player2.y ) return false;
+					if( (player1.y+40) > (player2.y+player2.height) ) return false;
+					
+					if( num == 1 )
+						hit1 = true;
+					if( num == 2 )
+						hit2 = true;
+						
+					return true;
+				}
+		}
+		
+		function player(character, num, x, y){
+			var player = new Object();
+			player.char = chars[character];
+			player.health = 100;
+			player.x = x;
+			player.dmg = player.char.dmg;
+			player.speed = player.char.speed;
+			player.jSpeed = player.char.jSpeed;
+			player.AWidth = player.char.AWidth;
+			player.height = player.char.height;
+			player.width = player.char.width;
+			player.Attack = player.char.Attack;
+			player.Attack_B = player.char.Attack_B;
+			player.num = num;
+			player.y = floor-player.height;
+			player.kb = player.char.KnockBack
+			return player;
+		}
+		
+		function draw(){
+		
+			switch(GameState){
+			
+			case START:
+				
+				ctx.drawImage( StartScreen, 0, 0 );
+				ctx =canvasElement.getContext("2d");
+				ctx.font="20px Comic Sans MS";
+				var gradient=ctx.createLinearGradient(0,0,canvasElement.width,0);
+				gradient.addColorStop("0","blue");
+				
+				ctx.fillStyle=gradient;
+				ctx.fillText( "PRESS ENTER", 300, 500 );
+			break;
+			
+			case CharSelect:
+				ctx.clearRect(0, 0, WIDTH, HEIGHT );
+				ctx.drawImage(CharScreen, 0, 0);
+				
+				if ( player1ready == false )
+					{
+						ctx.fillText( "Player ONE Press Spacebar!", 420, 350 );
+					}	
+				if ( player2ready != true )
+					{
+						ctx.fillText( "Player TWO Press Enter!", 420, 400 );
+					}
+				if ( player1ready == true)
+					{	
+						ctx.fillText( "Player ONE Is Ready!", 420, 500 );	
+					}	
+				if ( player2ready == true)
+					{
+						ctx.fillText( "Player TWO Is ready!", 420, 450 );
+					}
+					ctx =canvasElement.getContext("2d");
+				ctx.font="20px Georgia";
+				var gradient=ctx.createLinearGradient(0,0,canvasElement.width,0);
+				gradient.addColorStop("0","magenta");
+				gradient.addColorStop("0.5","blue");
+				gradient.addColorStop("1.0","red");
+				ctx.fillStyle=gradient;
+				ctx.fillText( "PLAYER1:", 20, 20 );
+				ctx.fillText( "PLAYER2:", (WIDTH-170), 20 );
+				ctx.fillText( chars[player1.char].chr, 120,  20);
+				ctx.fillText( chars[player2.char].chr, (WIDTH-70),  20);
+				
+				
+					
+			break;
+			
+			case GAME:
+				ctx.drawImage( FightStage, 0, 0);
+				if( attack1 == true && (player1.x+player1.width) < player2.x ){
+					ctx.drawImage( player1.Attack, player1.x, player1.y );
+				}
+				else if( attack1 == true && (player1.x+player1.width) > player2.x ){
+					ctx.drawImage( player1.Attack_B, (player1.x-(player2.AWidth/2)), player1.y );
+				}
+				else{
+					ctx.drawImage( player1.char.name, player1.x, player1.y );
+				}
+				
+				if( attack2 == true && player2.x > ( player1.x + player1.width ) ){
+					ctx.drawImage( player2.Attack_B, (player2.x-(player2.AWidth/2)), player2.y );
+				}
+				else if( attack2 == true && player2.x < player1.x ){
+					ctx.drawImage( player2.Attack, player2.x, player2.y );
+				}
+				else{
+					ctx.drawImage( player2.char.name, player2.x, player2.y );
+				}
+				ctx =canvasElement.getContext("2d");
+				ctx.font="20px Georgia";
+				var gradient=ctx.createLinearGradient(0,0,canvasElement.width,0);
+				gradient.addColorStop("0","magenta");
+				gradient.addColorStop("0.0","blue");
+				gradient.addColorStop("1.0","red");
+				ctx.fillStyle=gradient;
+				ctx.fillText( "PLAYER 1 HEALTH: " + player1.health, ((WIDTH/2)-420), 120 );
+				ctx.fillText( "PLAYER 2 HEALTH: " + player2.health, ((WIDTH/2)+100), 120 );
+				ctx.fillText( "gy =  " + gy, ((WIDTH/2)+200), 220 );
+				
+				
+			break;
+
+			case POST:
+				ctx.clearRect(0, 0, WIDTH, HEIGHT );
+				if( player2.health <= 0 ){
+					ctx.fillText( "PLayer 1 Wins! ", 400, 450 );
+					ctx.fillText( "PLAYER 2 IS A Loser!", 400, 500 );
+				}
+				if( player1.health <= 0 ){
+					ctx.fillText( "PLayer 2 Wins! ", 400, 450 );
+					ctx.fillText( "PLAYER 1 IS A Loser!", 400, 500 );
+				}
+				
+			break;
+				
+			}
+		}
+		
+		function KeyDown(evt){
+			
+			switch (GameState){
+			
+				case START:
+					if (evt.keyCode == 13 )
+						attack1 = true;
+				break;
+				
+				case CharSelect:
+					
+					if( evt.keyCode == 49 )
+						player1.char = 0;
+					if( evt.keyCode == 50 )
+						player1.char = 1;
+					if( evt.keyCode == 51 )
+						player1.char = 2;
+					if( evt.keyCode == 52 )
+						player1.char = 3;
+					if ( evt.keyCode == 32 )
+					{
+						player1ready = true;
+					}	
+					if( evt.keyCode == 97 )
+						player2.char = 0;
+					if( evt.keyCode == 98 )
+						player2.char = 1;
+					if( evt.keyCode == 99 )
+						player2.char = 2;
+					if( evt.keyCode == 100 )
+						player2.char = 3;
+					if ( evt.keyCode == 13)
+					{
+						player2ready = true;
+					}						
+					
+					
+						
+					
+					if ( player1ready == true && player2ready == true)
+					{
+						if ( player1.char >= 0 ){
+							player1 = player(player1.char, 1, x1, y1 );
+						}
+						else{
+							player1 = player( 0, 1, x1, y1 );
+						}
+						if (player2.char >= 0 ){
+							player2 = player(player2.char, 2, x2, y2 );
+						}
+						else{
+							player2 = player( 0, 2, x2, y2 );
+						}
+						GameState = GAME;
+					}
+					
+				break;
+				
+				case GAME:
+					if ( evt.keyCode == 38 )
+						up2 = true
+					if ( evt.keyCode == 37 )
+						left2 = true
+					if ( evt.keyCode == 39 )
+						right2 = true
+					if ( evt.keyCode == 13 ){
+						attack2 = true
+					}
+					
+					if ( evt.keyCode == 87 )
+						up1 = true
+					if ( evt.keyCode == 65 )
+						left1 = true
+					if ( evt.keyCode == 68 )
+						right1 = true 
+					if ( evt.keyCode == 32 )
+						attack1 = true
+				break;
+				
+				case POST:
+				break;
+			}
+				
+				
+		
+				if ( 37 <= evt.keyCode && evt.keyCode <= 40 )
+					evt.preventDefault();
+		}
+		
+		function KeyUp(evt){
+				if ( evt.keyCode == 38 )
+					up2 = false;
+				if ( evt.keyCode == 37 )
+					left2 = false
+				if ( evt.keyCode == 39 )
+					right2 = false
+				if ( evt.keyCode == 13 ) {
+					attack2 = false
+				}
+					
+				if ( evt.keyCode == 87 )
+					up1 = false
+				if ( evt.keyCode == 65 )
+					left1 = false
+				if ( evt.keyCode == 68 )
+					right1 = false
+				if ( evt.keyCode == 32 )
+					attack1 = false
+		
+				if ( 37 <= evt.keyCode && evt.keyCode <= 40 )
+					evt.preventDefault();
+		}
+		
+		document.addEventListener('keydown', KeyDown );
+		document.addEventListener('keyup', KeyUp );
+		</script>
+</body>
+</html>
