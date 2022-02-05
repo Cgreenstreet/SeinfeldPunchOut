@@ -58,11 +58,11 @@
 		var HEIGHT = 576;
 		var FPS = 60;
 		var chars = new Array();
-//                             	      name, dmg, speed, JumpSpeed, characterNum, Attack Width, height,  character, KnockBack,  Attack, 			Attack_B
-		chars[0] = character( Jerry,  5, 5,      13,        0,            87,   155,   56,	"Jerry",    .03,       Jerry_Attack, 		Jerry_Attack_B);
-		chars[1] = character( George, 8, 3,      8,         1,            83,   132,   46,	"George",   8,         George_Attack,		George_Attack_B);
-		chars[2] = character( Kramer, 4, 8,      4,         2,            92,	172,   55,	"Kramer",   9,         Kramer_Attack,		Kramer_Attack_B);
-		chars[3] = character( Elaine, 3, 7,      7,         3,	          75,	160,   58,	"Elaine",   60,        Elaine_Attack,		Elaine_Attack_B);
+//                             	      name, dmg, speed, JumpSpeed, characterNum, Attack Width, Height, Width  character,  KnockBack,   Attack, 			Attack_B
+		chars[0] = character( Jerry,  5, 5,      13,        0,            87,   	155,   56,	"Jerry",    .03,       Jerry_Attack, 		Jerry_Attack_B);
+		chars[1] = character( George, 8, 3,      8,         1,            83,   	132,   46,	"George",   8,         George_Attack,		George_Attack_B);
+		chars[2] = character( Kramer, 4, 8,      4,         2,            92,		172,   55,	"Kramer",   9,         Kramer_Attack,		Kramer_Attack_B);
+		chars[3] = character( Elaine, 3, 7,      7,         3,	          75,		160,   58,	"Elaine",   60,        Elaine_Attack,		Elaine_Attack_B);
 //--------------------------------------------------------------------------------------------------------
 		
 		var up1 = false;
@@ -94,7 +94,7 @@
 		var y2 = 410; // player 2 y position
 		
 		var gy = 0.5;
-		var floor = 528; // y position of floor??
+		var floor = 528; // y position of floor
 		
 		var canvasElement = document.getElementById('canvas');
 		canvasElement.width = WIDTH;
@@ -237,7 +237,7 @@
 			break;
 			
 			default:
-				alert("ur fag");
+				alert("Error");
 			}
 		}
 		function character( name, dmg, speed, jSpeed, num, AWidth, Height, Width, characterName, KnockBack, Attack, Attack_B ){
@@ -398,11 +398,11 @@
 				ctx.clearRect(0, 0, WIDTH, HEIGHT );
 				if( player2.health <= 0 ){
 					ctx.fillText( "PLayer 1 Wins! ", 400, 450 );
-					ctx.fillText( "PLAYER 2 IS A Loser!", 400, 500 );
+					ctx.fillText( "PLAYER 2 Loses!", 400, 500 );
 				}
 				if( player1.health <= 0 ){
 					ctx.fillText( "PLayer 2 Wins! ", 400, 450 );
-					ctx.fillText( "PLAYER 1 IS A Loser!", 400, 500 );
+					ctx.fillText( "PLAYER 1 Loses!", 400, 500 );
 				}
 				
 			break;
